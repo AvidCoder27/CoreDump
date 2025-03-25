@@ -10,3 +10,7 @@
 .vscode/
 # ignore .o files
 out/
+
+nul
+
+*.class
