@@ -1,6 +1,6 @@
 # Compiler settings
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Ofast
+CXXFLAGS = -std=c++17 -Wall -Wextra -Ofast -fPIC
 INCLUDES = -Ichess_engine/include
 
 # Output binary
@@ -30,22 +30,22 @@ SRC_FILES = $(MAIN_SRC) $(BOARD_SRC) $(ENGINE_SRC) $(HEURISTICS_SRC) $(MOVE_SRC)
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.cpp,$(OUT_DIR)/%.o,$(SRC_FILES))
 
 # JNI settings
-JNI_HOME = C:/Users/aqeel/.jdks/openjdk-23.0.1
+JNI_HOME = /usr/lib/jvm/java-21-openjdk-amd64/
 JNI_INCLUDES = -I$(JNI_HOME)/include -I$(JNI_HOME)/include/win32
 JNI_SRC = GUI/EngineInteraction/EngineInteraction_EngineInteraction.cpp
 JNI_TARGET = GUI/EngineInteraction/EngineInteraction.dll
 
 # Java settings
-JAVAC = C:/Users/aqeel/.jdks/openjdk-23.0.1/bin/javac.exe
-JAVA = C:/Users/aqeel/.jdks/openjdk-23.0.1/bin/java.exe
+JAVAC = /usr/bin/javac
+JAVA = /usr/bin/java
 JAVA_FILES = GUI/ChessGame.java GUI/EngineInteraction/EngineInteraction.java
 
 # Ensure output directory exists
 $(shell mkdir $(OUT_DIR) 2>nul)
-$(shell mkdir $(OUT_DIR)\board 2>nul)
-$(shell mkdir $(OUT_DIR)\engine-related 2>nul)
-$(shell mkdir $(OUT_DIR)\extraHeuristics 2>nul)
-$(shell mkdir $(OUT_DIR)\move 2>nul)
+$(shell mkdir $(OUT_DIR)/board 2>/dev/null)
+$(shell mkdir $(OUT_DIR)/engine-related 2>/dev/null)
+$(shell mkdir $(OUT_DIR)/extraHeuristics 2>/dev/null)
+$(shell mkdir $(OUT_DIR)/move 2>/dev/null)
 
 # Default target - build and run
 all: $(TARGET) jni java run
@@ -69,13 +69,21 @@ java:
 # Run the application
 run:
 	@echo Running Chess GUI...
-	@$(JAVA) -Djava.library.path=GUI/EngineInteraction -cp ".;GUI" ChessGame
+	@$(JAVA) -Djava.library.path=GUI/EngineInteraction -cp ".:GUI" GUI.ChessGame
 
-# Clean build files
+# Clean with os specific syntax
+OS := $(shell uname 2>/dev/null || echo Windows)
+
 clean:
+ifeq ($(OS), Windows)
 	if exist $(OUT_DIR) rmdir /S /Q $(OUT_DIR)
 	del /Q GUI\EngineInteraction\*.class GUI\*.class
 	del /Q GUI\EngineInteraction\EngineInteraction.dll
+else
+	rm -rf $(OUT_DIR)
+	rm -f GUI/EngineInteraction/*.class GUI/*.class
+	rm -f GUI/EngineInteraction/EngineInteraction.dll
+endif
 
 # Phony targets
 .PHONY: all run clean jni java
